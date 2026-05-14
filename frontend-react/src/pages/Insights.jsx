@@ -40,7 +40,7 @@ export default function Insights() {
 
   if (loading) return <Spinner />
 
-  const hasData = pred?.historical_kwh?.length > 0
+  const hasData = pred?.status === 'ok' && pred?.predicted_kwh != null
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
@@ -66,22 +66,34 @@ export default function Insights() {
                 {pred.predicted_kwh} kWh <span className="text-sm text-muted font-normal">next month</span>
               </div>
             )}
-            <LazyPlot
-              data={[
-                { type: 'scatter', mode: 'lines+markers', name: 'Historical',
-                  x: pred.historical_dates || pred.historical_kwh.map((_, i) => `Bill ${i+1}`),
-                  y: pred.historical_kwh,
-                  line: { color: '#00C9B8', width: 2 }, marker: { size: 5 } },
-                ...(pred.prophet_forecast ? [{
-                  type: 'scatter', mode: 'lines', name: 'Prophet',
-                  x: pred.prophet_dates || [], y: pred.prophet_forecast,
-                  line: { color: '#1D4ED8', width: 2, dash: 'dot' },
-                }] : []),
-              ]}
-              layout={{ ...LAYOUT(220), yaxis: { ...LAYOUT().yaxis, title: 'kWh' } }}
-              config={{ displayModeBar: false, responsive: true }}
-              style={{ width: '100%' }}
-            />
+            <div className="space-y-2 text-sm mt-2">
+              {pred?.next_period && (
+                <div className="flex justify-between">
+                  <span className="text-muted">Next period</span>
+                  <span className="text-textSub font-semibold">{pred.next_period}</span>
+                </div>
+              )}
+              {pred?.trend && (
+                <div className="flex justify-between">
+                  <span className="text-muted">Trend</span>
+                  <span className={pred.trend === 'increasing' ? 'text-red-400 font-semibold' : 'text-emerald-400 font-semibold'}>
+                    {pred.trend === 'increasing' ? '↑ Increasing' : '↓ Decreasing'}
+                  </span>
+                </div>
+              )}
+              {pred?.monthly_change_kwh != null && (
+                <div className="flex justify-between">
+                  <span className="text-muted">Monthly change</span>
+                  <span className="text-textSub font-semibold">{pred.monthly_change_kwh > 0 ? '+' : ''}{pred.monthly_change_kwh} kWh/month</span>
+                </div>
+              )}
+              {pred?.data_points && (
+                <div className="flex justify-between">
+                  <span className="text-muted">Data points</span>
+                  <span className="text-textSub">{pred.data_points} bills</span>
+                </div>
+              )}
+            </div>
             {pred?.model && <div className="text-xs text-muted mt-2">Model: {pred.model}</div>}
           </div>
 
