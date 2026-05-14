@@ -29,13 +29,14 @@ export default function Insights() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const safe = (p) => p.then(r => r.data).catch(() => null)
     Promise.all([
-      getPredictions(), getAnomalies(), getClassify(),
-      getRecommendations(), getClusters(), getChangepoints(), getCostPrediction(),
+      safe(getPredictions()), safe(getAnomalies()), safe(getClassify()),
+      safe(getRecommendations()), safe(getClusters()), safe(getChangepoints()), safe(getCostPrediction()),
     ]).then(([p, a, cl, r, clu, cp, co]) => {
-      setPred(p.data); setAnomalies(a.data); setClassify(cl.data)
-      setRecs(r.data || []); setClusters(clu.data); setChangepoints(cp.data); setCostPred(co.data)
-    }).catch(() => {}).finally(() => setLoading(false))
+      setPred(p); setAnomalies(a); setClassify(cl)
+      setRecs(r || []); setClusters(clu); setChangepoints(cp); setCostPred(co)
+    }).finally(() => setLoading(false))
   }, [])
 
   if (loading) return <Spinner />
