@@ -3,12 +3,17 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      'buffer/': 'buffer',
+    },
+  },
   define: {
     global: 'globalThis',
-    'process.env': {},
+    'process.env': '{}',
   },
   optimizeDeps: {
-    include: ['plotly.js', 'react-plotly.js'],
+    include: ['plotly.js', 'react-plotly.js', 'buffer'],
   },
   server: {
     port: 3000,
