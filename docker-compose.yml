@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  backend:
+    build: .
+    command: uvicorn backend.app:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploaded_bills:/app/uploaded_bills
+      - ./energy_auditor.db:/app/energy_auditor.db
+    env_file:
+      - .env
+    environment:
+      - STREAMLIT_URL=http://localhost:8501
+      - FRONTEND_URL=http://localhost:3000
+
+  # React frontend (primary — recommended)
+  react:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+  # Streamlit frontend (legacy — keep for reference)
+  streamlit:
+    build: .
+    command: streamlit run frontend/ui.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
+    environment:
+      - API_URL=http://backend:8000
+    depends_on:
+      - backend
+    profiles:
+      - legacy

@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+
+body {
+  background: #060B17;
+  color: #F1F5F9;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #060B17; }
+::-webkit-scrollbar-thumb { background: #1A2840; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2D3F55; }
+
+@layer components {
+  .card {
+    @apply bg-surface border border-border rounded-2xl p-5;
+  }
+  .card-sm {
+    @apply bg-surface border border-border rounded-xl p-4;
+  }
+  .kpi-card {
+    @apply bg-surface border border-border rounded-2xl p-5 h-full flex flex-col;
+  }
+  .btn-primary {
+    @apply bg-gradient-to-r from-teal to-blue text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-opacity hover:opacity-90 disabled:opacity-50 cursor-pointer border-0;
+  }
+  .btn-secondary {
+    @apply bg-surface border border-border text-textSub font-medium px-5 py-2.5 rounded-xl text-sm transition-colors hover:border-teal hover:text-teal cursor-pointer;
+  }
+  .btn-danger {
+    @apply bg-red-500/10 border border-red-500/30 text-red-400 font-medium px-5 py-2.5 rounded-xl text-sm hover:bg-red-500/20 cursor-pointer;
+  }
+  .sec-head {
+    @apply text-xs font-bold uppercase tracking-widest text-muted mb-3;
+  }
+  .field-input {
+    @apply bg-[#0A1018] border border-border rounded-xl px-4 py-2.5 text-text text-sm w-full focus:outline-none focus:border-teal transition-colors placeholder:text-muted;
+  }
+  .badge-teal {
+    @apply inline-flex items-center gap-1 text-[0.68rem] font-semibold tracking-wide bg-teal/10 border border-teal/25 text-teal px-2.5 py-0.5 rounded-full;
+  }
+  .info-box {
+    @apply bg-[#0A1018] border border-border rounded-xl p-4 text-textSub text-sm text-center;
+  }
+}
