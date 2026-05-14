@@ -53,7 +53,9 @@ export default function App() {
     if (!token) { setAuthLoading(false); return }
     getMe()
       .then(r => setUser(r.data))
-      .catch(() => localStorage.removeItem('token'))
+      .catch((err) => {
+        if (err.response?.status === 401) localStorage.removeItem('token')
+      })
       .finally(() => setAuthLoading(false))
   }, [])
 
