@@ -32,6 +32,10 @@ Base.metadata.create_all(bind=engine)
 
 
 def _migrate_new_columns() -> None:
+    import os
+    db_url = os.getenv("DATABASE_URL", "sqlite")
+    if not db_url.startswith("sqlite"):
+        return  # PostgreSQL: create_all handles schema, no PRAGMA needed
     bill_cols = {
         "standing_charge": "FLOAT",
         "unit_rate": "FLOAT",
