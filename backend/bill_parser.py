@@ -171,6 +171,16 @@ def parse_british_gas(text: str) -> Dict[str, Any]:
         data["amount_due"] = amt
 
     d = _find_date(text, r"(?:bill|invoice|statement)\s+date")
+    if not d:
+        # fallback: find any date near "Bill date" label with flexible spacing
+        m2 = re.search(r"Bill\s+date[:\s\n]+([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE)
+        if m2:
+            d = m2.group(1).strip()
+    if not d:
+        # last resort: first standalone date in text
+        dates = re.findall(r"\b([0-9]{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20[0-9]{2})\b", text, re.IGNORECASE)
+        if dates:
+            d = dates[-1]  # last date is usually bill date
     if d:
         data["bill_date"] = d
 
