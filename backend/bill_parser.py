@@ -172,15 +172,22 @@ def parse_british_gas(text: str) -> Dict[str, Any]:
 
     d = _find_date(text, r"(?:bill|invoice|statement)\s+date")
     if not d:
-        # fallback: find any date near "Bill date" label with flexible spacing
-        m2 = re.search(r"Bill\s+date[:\s\n]+([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE)
+        # fallback: flexible multiline search for "Bill date"
+        m2 = re.search(r"Bill\s+date[:\s\t\n\r]+([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE | re.DOTALL)
         if m2:
             d = m2.group(1).strip()
     if not d:
-        # last resort: first standalone date in text
+        # last resort: find date closest after "Bill date" label position
+        label_m = re.search(r"Bill\s+date", text, re.IGNORECASE)
         dates = re.findall(r"\b([0-9]{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20[0-9]{2})\b", text, re.IGNORECASE)
-        if dates:
-            d = dates[-1]  # last date is usually bill date
+        if dates and label_m:
+            # find date appearing right after the label
+            after_label = text[label_m.end():]
+            m3 = re.search(r"([0-9]{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+20[0-9]{2})", after_label, re.IGNORECASE)
+            if m3:
+                d = m3.group(1).strip()
+        elif dates:
+            d = dates[0]
     if d:
         data["bill_date"] = d
 
