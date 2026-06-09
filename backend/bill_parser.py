@@ -189,7 +189,16 @@ def parse_british_gas(text: str) -> Dict[str, Any]:
     if d:
         data["bill_date"] = d
 
+    # Due date: "Please pay £X by DD Mon YYYY"
     d = _find_date(text, r"(?:pay(?:ment)?\s+(?:by|due|date)|due\s+date)")
+    if not d:
+        m2 = re.search(r"please\s+pay[^\n]*?by\s+([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE)
+        if m2:
+            d = m2.group(1).strip()
+    if not d:
+        m3 = re.search(r"\bpay[^\n]*?by\s+([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE)
+        if m3:
+            d = m3.group(1).strip()
     if d:
         data["due_date"] = d
 
@@ -198,6 +207,13 @@ def parse_british_gas(text: str) -> Dict[str, Any]:
         data["usage_kwh"] = kwh
 
     ur = _find_unit_rate(text)
+    if not ur:
+        m2 = re.search(r"([0-9]+\.?[0-9]*)\s*p\s*(?:per\s*kWh|/\s*kWh)", text, re.IGNORECASE)
+        if m2:
+            try:
+                ur = float(m2.group(1))
+            except ValueError:
+                pass
     if ur:
         data["unit_rate"] = ur
 
@@ -209,7 +225,9 @@ def parse_british_gas(text: str) -> Dict[str, Any]:
     if ms:
         data["meter_serial"] = ms
 
-    m = re.search(r"tariff[:\s]+(.{3,50}?)(?:\n|  |$)", text, re.IGNORECASE)
+    m = re.search(r"(?:gas|electricity)\s+tariff[:\s]+(.{3,60}?)(?:\n|$)", text, re.IGNORECASE)
+    if not m:
+        m = re.search(r"tariff[:\s]+(.{3,50}?)(?:\n|  |$)", text, re.IGNORECASE)
     if m:
         data["tariff_name"] = m.group(1).strip()
 

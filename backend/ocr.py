@@ -63,15 +63,42 @@ def preprocess_image(file_path: str):
     )
 
 
+def _pdftotext(file_path: str) -> str:
+    """Try to extract text directly from a digital PDF using pdftotext (poppler)."""
+    import subprocess
+    cmd = ["pdftotext", "-layout", file_path, "-"]
+    # On Windows, pdftotext lives inside the poppler bin directory
+    if _poppler:
+        import os
+        exe = os.path.join(_poppler, "pdftotext.exe" if sys.platform == "win32" else "pdftotext")
+        if os.path.isfile(exe):
+            cmd[0] = exe
+    try:
+        result = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
+        if result.returncode == 0:
+            return result.stdout
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    return ""
+
+
 def extract_text(file_path: str) -> str:
     """Extract text from an image or PDF bill. Raises RuntimeError on failure."""
+    lower = file_path.lower()
+
+    if lower.endswith(".pdf"):
+        # For digital PDFs, try direct text extraction first — far more accurate than OCR
+        raw = _pdftotext(file_path)
+        if raw.strip():
+            lines = [" ".join(line.split()) for line in raw.splitlines()]
+            return "\n".join(line for line in lines if line.strip())
+        # Fall through to OCR for scanned/image PDFs
+
     if not _tesseract:
         raise RuntimeError(
             "Tesseract OCR not found. Install it from https://github.com/UB-Mannheim/tesseract/wiki "
             "or set the TESSERACT_CMD environment variable to the tesseract.exe path."
         )
-
-    lower = file_path.lower()
 
     if lower.endswith((".png", ".jpg", ".jpeg")):
         processed = preprocess_image(file_path)
