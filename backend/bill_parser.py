@@ -172,15 +172,20 @@ def parse_british_gas(text: str) -> Dict[str, Any]:
 
     d = _find_date(text, r"(?:bill|invoice|statement)\s+date")
     if not d:
-        # Try same-line match using MULTILINE anchor
+        # Same-line match with MULTILINE (works now that OCR preserves newlines)
         m2 = re.search(r"^Bill\s+date[:\s]+([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE | re.MULTILINE)
         if m2:
             d = m2.group(1).strip()
     if not d:
-        # Try "Covering: X – DATE" pattern — end date of covering period is bill date
-        m3 = re.search(r"Covering[:\s]+[^\n]*?[–\-]\s*([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE)
+        # Without colon — OCR sometimes drops punctuation
+        m3 = re.search(r"bill\s+date\s+([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE)
         if m3:
             d = m3.group(1).strip()
+    if not d:
+        # "Covering: DD Mon YYYY – DD Mon YYYY" — take the end date
+        m4 = re.search(r"Covering[:\s]+(?:[^\n–\-]*)[–\-]\s*([0-9]{1,2}\s+\w+\s+20[0-9]{2})", text, re.IGNORECASE)
+        if m4:
+            d = m4.group(1).strip()
     if d:
         data["bill_date"] = d
 

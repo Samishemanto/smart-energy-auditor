@@ -88,7 +88,9 @@ def extract_text(file_path: str) -> str:
     else:
         raise ValueError("Unsupported file type. Upload PNG, JPG, or PDF.")
 
-    result = " ".join(text.split())
+    # Preserve line structure: normalise whitespace within each line but keep newlines
+    lines = [" ".join(line.split()) for line in text.splitlines()]
+    result = "\n".join(line for line in lines if line.strip())
     if not result.strip():
         raise RuntimeError("OCR extracted no text. The bill image may be too dark or low-resolution.")
     return result
