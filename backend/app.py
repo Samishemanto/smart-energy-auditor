@@ -396,6 +396,18 @@ def get_bill(
     return bill
 
 
+@app.get("/bills/{bill_id}/raw-text")
+def get_bill_raw_text(
+    bill_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    bill = db.query(Bill).filter(Bill.id == bill_id, Bill.user_id == current_user.id).first()
+    if not bill:
+        raise HTTPException(status_code=404, detail="Bill not found")
+    return {"id": bill_id, "raw_text": bill.raw_text or ""}
+
+
 class BillPatch(BaseModel):
     provider: str | None = None
     account_number: str | None = None
