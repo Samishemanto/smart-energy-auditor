@@ -668,7 +668,18 @@ _PARSERS = {
 }
 
 
+def _fix_ocr_chars(text: str) -> str:
+    """Fix common OCR digit/letter confusions before regex parsing."""
+    months = r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)"
+    # S or s before a month name is almost always the digit 5
+    text = re.sub(r'\b[Ss](\s+' + months + r')', r'5\1', text)
+    # l or I before a month name is almost always the digit 1
+    text = re.sub(r'\b[lI](\s+' + months + r')', r'1\1', text)
+    return text
+
+
 def parse_bill(text: str) -> Dict[str, Any]:
+    text = _fix_ocr_chars(text)
     provider = detect_provider(text)
     result: Dict[str, Any] = {"provider": provider}
 
