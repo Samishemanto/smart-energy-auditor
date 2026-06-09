@@ -81,6 +81,16 @@ def predict_next_month(bills) -> Dict[str, Any]:
                 .coef_[0]
             ), 1)
 
+            history = [
+                {
+                    "date": d[3].strftime("%b %Y"),
+                    "kwh": d[1],
+                    "cost": round(d[2], 2),
+                    "carbon_kg": round(d[1] * CARBON_FACTOR, 2),
+                }
+                for d in data
+            ]
+
             return {
                 "status": "ok",
                 "model": "prophet",
@@ -92,6 +102,7 @@ def predict_next_month(bills) -> Dict[str, Any]:
                 "trend": "increasing" if monthly_change > 0 else "decreasing",
                 "monthly_change_kwh": monthly_change,
                 "next_period": next_dt.strftime("%B %Y"),
+                "history": history,
             }
         except ImportError:
             pass  # prophet not installed — fall through to linear regression
@@ -118,6 +129,16 @@ def predict_next_month(bills) -> Dict[str, Any]:
     else:
         next_dt = last_dt.replace(month=last_dt.month + 1)
 
+    history = [
+        {
+            "date": d[3].strftime("%b %Y"),
+            "kwh": d[1],
+            "cost": round(d[2], 2),
+            "carbon_kg": round(d[1] * CARBON_FACTOR, 2),
+        }
+        for d in data
+    ]
+
     return {
         "status": "ok",
         "model": "linear_regression",
@@ -129,6 +150,7 @@ def predict_next_month(bills) -> Dict[str, Any]:
         "trend": "increasing" if monthly_change > 0 else "decreasing",
         "monthly_change_kwh": monthly_change,
         "next_period": next_dt.strftime("%B %Y"),
+        "history": history,
     }
 
 
