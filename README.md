@@ -25,7 +25,7 @@ An AI-powered energy bill analyser that extracts data from utility bills using O
 ## Tech Stack
 
 ### Frontend
-- React 18 + Vite
+- React 19 + Vite
 - Plotly.js (interactive charts)
 - Deployed on **Vercel**
 
@@ -98,7 +98,7 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
