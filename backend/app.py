@@ -73,12 +73,13 @@ _migrate_new_columns()
 app = FastAPI(title="Smart Energy Auditor API", version="0.3.0")
 
 _ALLOWED_ORIGINS = [
-    "http://localhost:8501",
-    "http://127.0.0.1:8501",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    os.getenv("STREAMLIT_URL", "http://localhost:8501"),
-    os.getenv("REACT_URL", "http://localhost:3000"),
+    "https://smart-energy-auditor.vercel.app",
+    os.getenv("FRONTEND_URL", "https://smart-energy-auditor.vercel.app"),
+    os.getenv("REACT_URL", "http://localhost:5173"),
 ]
 
 app.add_middleware(
@@ -150,6 +151,10 @@ class AdminUserOut(BaseModel):
 
 
 # ─── PUBLIC ENDPOINTS ──────────────────────────────────────────────────────────
+
+@app.get("/")
+def root():
+    return {"status": "ok", "name": "Smart Energy Auditor API", "version": "0.3.0", "docs": "/docs"}
 
 @app.get("/health")
 def health():
